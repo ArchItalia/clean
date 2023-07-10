@@ -7,11 +7,12 @@
 
 cache=$(du -sh /var/cache/pacman/pkg/ | awk '{ print $1 }')
 lib=$(du -sh /var/lib/pacman/ | awk '{ print $1 }')
-home_cache=$(du -sh ~/.cache/ | awk '{ print $1 }')
-total=$(echo "$cache + $lib + $home_cache" | bc)
-
-if (( $(echo "$total < 1024" | bc -l) )); then
-        unit="M"
+home_cache=$(du -sh $HOME/.cache/ | awk '{ print $1 }')
+trash=$(du -sh $HOME/.local/share/Trash/files/ | awk '{ print $1 }') 
+total=$(echo "$cache + $lib + $home_cache + $trash" | bc) 
+ 
+if (( $(echo "$total < 1024" | bc -l) )); then 
+        unit="M" 
         total=$(echo "$total" | awk '{printf "%.2f\n", $1}')
      else
         unit="G"
@@ -37,7 +38,4 @@ if [ $answer = "y" ]; then
 
     echo -e "\e[32mClean up completed!\e[0m"
 else
-    echo  "No action taken."
-fi
-echo ""
-
+-- VISUAL --                                                                                               6         16,61         Top
