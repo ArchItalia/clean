@@ -2,16 +2,20 @@
 #
 # Author : Jonathan Sanfilippo
 # Date: Jul 2023
-# Version 1.0.0: Clean
+# Version 2.1: Clean
 #
 
 
 
-
+B="B"
 cache=$(du -sk /var/cache/pacman/pkg/ | awk '{ print $1 }')
 lib=$(du -sk /var/lib/pacman/ | awk '{ print $1 }')
 home_cache=$(du -sk $HOME/.cache/ | awk '{ print $1 }')
 trash=$(du -sk $HOME/.local/share/Trash/files/ | awk '{ print $1 }')
+cache2=$(du -sh /var/cache/pacman/pkg/ | awk '{ print $1 }')
+lib2=$(du -sh /var/lib/pacman/ | awk '{ print $1 }')
+home_cache2=$(du -sh $HOME/.cache/ | awk '{ print $1 }')
+trash2=$(du -sh $HOME/.local/share/Trash/files/ | awk '{ print $1 }')
 total=$(echo "$cache + $lib + $home_cache + $trash" | bc)
 
 if (( $(echo "$total < 1024" | bc -l) )); then
@@ -35,6 +39,12 @@ else
     echo  "  No packages to remove."
 fi
 echo ""
+
+echo -e "\e[33mChecking disk usage...\e[0m"
+echo "Packages: $cache2$B"
+echo "Library Pacman: $lib2$B"
+echo "Home Cache: $home_cache2$B"
+echo "Trash: $trash2$B"
 echo -e "Current space between cache, package cache, and trash: \e[0m\e[94m$total$unit\e[0m\e[33m"
 printf " \e[33m Do you want to remove ALL files from cache and unused repositories? Respond with 'y' or 'n': \e[0m" && read answer
 
@@ -43,6 +53,7 @@ if [ $answer = "y" ]; then
      rm -rf ~/.local/share/Trash/files/*
      yes | sudo pacman -Scc
 
+    echo "" 
     echo -e "\e[32mClean up completed!\e[0m"
 else
     echo  "No action taken."
