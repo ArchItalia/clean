@@ -1,13 +1,28 @@
-# Maintainer: Jonathan Sanfilippo https://github.com/architalia/clean/
+# Maintainer: Jonathan Sanfilippo <jonalinux dot uk at gmail dot com>
 
-pkgname=clean
-pkgver=2.1
+pkgname=clean-git
+pkgver=2.1.r1.gca10c20
 pkgrel=1
-pkgdesc="System cleaner"
+pkgdesc="$ clean - easy command for arch linux, orphans, cache"
 arch=('any')
-license=('GPL')
-depends=('bash' 'bc')  # Specifica le dipendenze del pacchetto, se ce ne sono
+url="https://github.com/architalia/clean"
+license=('GPL3')
+depends=('bash' 'bc')
+makedepends=(git)
+provides=(clean)
+conflicts=(clean)
+source=("git+https://github.com/architalia/clean.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd clean
+  # git with tags, cut 'v' prefix
+  git describe --long --tags | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
 
 package() {
-   install -Dm755 clean "$pkgdir/usr/bin/clean"
+  cd clean/src
+  install -Dm755 -t "$pkgdir/usr/bin/" clean
 }
+
+
