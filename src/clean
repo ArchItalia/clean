@@ -30,7 +30,7 @@ echo -e "\e[33mChecking for obsolete packages and dependencies..\e[0m"
 
 if pacman -Qdt &> /dev/null; then
     echo  "Removing obsolete packages and dependencies.."
-    pacman -Qdt | awk '{print $1}' | sudo pacman -Rs -
+    pacman -Qdt | awk '{print $1}' | sudo pacman -Rns -
 else
     echo  "  No packages to remove."
 fi
