@@ -1,4 +1,4 @@
-# Maintainer: Jonathan Sanfilippo https://github.com/architalia/clean/
+# Maintainer: Jonathan Sanfilippo  <jonalinux dot uk at gmail dot com>
 
 pkgname=clean
 pkgver=2.1
