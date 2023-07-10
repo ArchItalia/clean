@@ -5,19 +5,26 @@
 # Version 1.0.0: Clean
 #
 
-cache=$(du -sh /var/cache/pacman/pkg/ | awk '{ print $1 }')
-lib=$(du -sh /var/lib/pacman/ | awk '{ print $1 }')
-home_cache=$(du -sh $HOME/.cache/ | awk '{ print $1 }')
-trash=$(du -sh $HOME/.local/share/Trash/files/ | awk '{ print $1 }') 
-total=$(echo "$cache + $lib + $home_cache + $trash" | bc) 
- 
-if (( $(echo "$total < 1024" | bc -l) )); then 
-        unit="M" 
-        total=$(echo "$total" | awk '{printf "%.2f\n", $1}')
-     else
-        unit="G"
-        total=$(echo "scale=2; $total/1024" | bc -l)
+
+
+
+cache=$(du -sk /var/cache/pacman/pkg/ | awk '{ print $1 }')
+lib=$(du -sk /var/lib/pacman/ | awk '{ print $1 }')
+home_cache=$(du -sk $HOME/.cache/ | awk '{ print $1 }')
+trash=$(du -sk $HOME/.local/share/Trash/files/ | awk '{ print $1 }')
+total=$(echo "$cache + $lib + $home_cache + $trash" | bc)
+
+if (( $(echo "$total < 1024" | bc -l) )); then
+    unit="KB"
+    total=$(echo "$total" | awk '{printf "%.2f\n", $1}')
+elif (( $(echo "$total < 1048576" | bc -l) )); then
+    unit="MB" 
+    total=$(echo "scale=2; $total/1024" | bc -l)
+else
+    unit="GB"
+    total=$(echo "scale=2; $total/(1024*1024)" | bc -l)
 fi
+
 echo ""
 echo -e "\e[33mChecking for obsolete packages and dependencies..\e[0m"
 
@@ -38,4 +45,7 @@ if [ $answer = "y" ]; then
 
     echo -e "\e[32mClean up completed!\e[0m"
 else
--- VISUAL --                                                                                               6         16,61         Top
+    echo  "No action taken."
+fi
+echo ""
+
