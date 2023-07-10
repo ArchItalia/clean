@@ -1,11 +1,11 @@
 # Clean
 
 ## install
- yay -S clean or
+* `yay -S clean` or
 
-* git clone https://github.com/architalia/clean.git
-* cd clean
-* makepkg -si
+* `git clone https://github.com/architalia/clean.git`
+* `cd clean`
+* `makepkg -si`
 
 `$ clean` easy command for arch linux
 
