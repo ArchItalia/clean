@@ -1,7 +1,7 @@
 # Maintainer: Jonathan Sanfilippo https://github.com/architalia/clean/
 
 pkgname=clean
-pkgver=2.0
+pkgver=2.1
 pkgrel=1
 pkgdesc="System cleaner"
 arch=('any')
