@@ -1,6 +1,8 @@
 # Clean
 
 ## install
+ yay -S clean or
+
 * git clone https://github.com/architalia/clean.git
 * cd clean
 * makepkg -si
