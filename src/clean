@@ -2,10 +2,8 @@
 #
 # Author : Jonathan Sanfilippo
 # Date: Jul 2023
-# Version 2.1: Clean
+# Version 2.2: Clean
 #
-
-
 
 B="B"
 cache=$(du -sk /var/cache/pacman/pkg/ | awk '{ print $1 }')
@@ -29,34 +27,93 @@ else
     total=$(echo "scale=2; $total/(1024*1024)" | bc -l)
 fi
 
-echo ""
-echo -e "\e[33mChecking for obsolete packages and dependencies..\e[0m"
+# Show confirmation message
+show_confirmation() {
+  whiptail --title "Confirm" --yesno "$1" 0 0
+  return $?
+}
 
-if pacman -Qdt &> /dev/null; then
-    echo  "Removing obsolete packages and dependencies.."
-    pacman -Qdt | awk '{print $1}' | sudo pacman -Rns -
-else
-    echo  "  No packages to remove."
-fi
-echo ""
+# Show information message
+show_message() {
+  whiptail --title "Info" --msgbox "$1" 0 0
+}
 
-echo -e "\e[33mChecking disk usage...\e[0m"
-echo "Packages: $cache2$B"
-echo "Library Pacman: $lib2$B"
-echo "Home Cache: $home_cache2$B"
-echo "Trash: $trash2$B"
-echo -e "Current space between cache, package cache, and trash: \e[0m\e[94m$total$unit\e[0m\e[33m"
-printf " \e[33m Do you want to remove ALL files from cache and unused repositories? Respond with 'y' or 'n': \e[0m" && read answer
 
-if [ $answer = "y" ]; then
-     rm -rf ~/.cache/*
-     rm -rf ~/.local/share/Trash/files/*
-     yes | sudo pacman -Scc
 
-    echo "" 
-    echo -e "\e[32mClean up completed!\e[0m"
-else
-    echo  "No action taken."
-fi
-echo ""
+# Show main menu
+while true; do
+  choice=$(whiptail --title "Clean v2.2" --menu "Please select an option:" 0 60 0 \
+    "1" "Check recoverable space" \
+    "2" "Orphans Packages" \
+    "3" "Remove cache that are no longer installed" \
+    "4" "Remove all packages cache" \
+    "5" "Remove home cache and Trash files" \
+    "6" "All in One!" \
+    "9" "Exit" \
+    3>&1 1>&2 2>&3)
+
+  # Check if choice is empty (user pressed Cancel)
+  if [ -z "$choice" ]; then
+    echo "Exiting.."
+    exit 0
+  fi
+
+  case $choice in
+    1)
+      show_message "Current space between home cache: $home_cache2$B, packages cache: $cache2$B, library pacman: $lib2$B, and trash: $trash2$B, total: $total$unit";;
+    2)
+      if pacman -Qdt &> /dev/null; then
+         if show_confirmation "Orphaned packages and possible dependencies found, show them?"; then
+            pacman -Qdt | awk '{print $1}' | sudo pacman -Rns -
+         else
+            show_message "Cancellation in progress..."   
+         fi 
+      else
+         show_message "No obsolete packages to remove."
+      fi    
+      ;;
+    3)
+       if show_confirmation "Are you sure you want to remove no longer installed packages cache: $cache2$B, library pacman: $lib2$B?"; then
+        yes | sudo pacman -Sc
+        show_message "Package cache cleanup complete."
+      else
+        show_message "Package cache cleanup cancelled."
+      fi
+      ;;
+    4)
+      if show_confirmation "Are you sure you want to remove all installed packages cache: $cache2$B, library pacman: $lib2$B?"; then
+        yes | sudo pacman -Scc
+        show_message "Package cache cleanup complete."
+      else
+        show_message "Package cache cleanup cancelled."
+      fi
+      ;;
+    5)
+      if show_confirmation "Are you sure you want to remove home cache: $home_cache2$B and Trash files: $trash2$B?"; then
+        rm -rf $HOME/.cache/* $HOME/.local/share/Trash/files/*
+        show_message "Home cache and trash file cleanup complete."
+      else
+        show_message "Home cache and trash file cleanup cancelled."
+      fi
+      ;;
+    6)
+      if show_confirmation "Are you sure you want to remove all system caches and trash files, total: $total$unit?"; then
+        yes | sudo pacman -Scc 
+        rm -rf $HOME/.cache/*
+        rm -rf $HOME/.local/share/Trash/files/*
+        show_message "System cache and trash file cleanup complete."
+     else
+       show_message "System cache and trash file cleanup cancelled."
+      fi
+      ;;
+    9)
+      show_message "Goodbye!"
+      clear
+      exit 0
+      ;;
+    *)
+      show_message "No valid option, please try again!"
+      ;;
+  esac
+done
 
